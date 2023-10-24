@@ -10,7 +10,7 @@ public class ApiController {
     @GetMapping("/hello")
     public String hello() {
         System.out.println("Received request for /hello");
-        String response = "Hello, World!";
+        String response = "Hello BDE!!!";
         System.out.println("Sending response: " + response);
         return response;
     }

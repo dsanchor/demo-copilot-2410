@@ -9,6 +9,9 @@ env:
   DOCKER_USERNAME: ${{ github.actor }}
   DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
   IMAGE_NAME: demo2410
+  AKS_RESOURCE_GROUP: aks-demo-alb-rg
+  AKS_CLUSTER_NAME: demo
+  NAMESPACE: demo2410
 
 jobs:
   build-and-push:
@@ -34,3 +37,14 @@ jobs:
         run: |
           docker build -t ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:${{ github.sha }} .
           docker push ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+      - name: Get AKS credentials
+        uses: azure/aks-get-credentials@v1
+        with:
+          creds: ${{ env.AZURE_CREDENTIALS }}
+          resource-group: ${{ env.AKS_RESOURCE_GROUP }}
+          cluster-name: ${{ env.AKS_CLUSTER_NAME }}
+
+      - name: Deploy app to AKS
+        run: |
+          sed -i "s/\$IMAGE_TAG/${{ github.sha }}/g" k8s/application.yaml
+          kubectl apply -f k8s/application.yaml -n ${{ env.NAMESPACE }}
